@@ -1,60 +1,41 @@
-import './style.css'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.ts'
+import { Map } from 'maplibre-gl';
+import { addKotaLayer, addPulauLayer } from './layers/vektor';
+import { addRasterLayer } from './layers/raster';
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+const mapElement = document.createElement('div');
+mapElement.id = 'map';
+mapElement.style.height = "100vh";
+mapElement.style.width = "100vw";
+mapElement.style.margin = "0";
+document.body.style.margin = "0";
+document.body.appendChild(mapElement);
 
-<div class="ticks"></div>
+const map = new Map({
+  container: 'map',
+  style: 'https://demotiles.maplibre.org/globe.json',
+  center: [107.66, -7.14],
+  zoom: 1,
+});
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+map.on("load", () => {
+  addKotaLayer(map);
+  addPulauLayer(map);
+  addRasterLayer(map);
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+  map.addSource("monas", {
+    type: "image",
+    url: "https://upload.wikimedia.org/wikipedia/id/b/b1/Merdeka_Square_Monas_02.jpg",
+    coordinates: [
+      [106.822, -6.172], // top-left
+      [106.832, -6.172], // top-right
+      [106.832, -6.182], // bottom-right
+      [106.822, -6.182] // bottom-left
+    ]
+  });
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+  map.addLayer({
+    id: "monas-image",
+    type: "raster",
+    source: "monas",
+  });
+});
