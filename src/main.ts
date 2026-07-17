@@ -1,41 +1,51 @@
-import { Map } from 'maplibre-gl';
-import { addKotaLayer, addPulauLayer } from './layers/vektor';
-import { addRasterLayer } from './layers/raster';
+import {
+  Map,
+  FullscreenControl,
+  GlobeControl,
+  LogoControl,
+} from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { addKotaLayer, addPulauLayer } from './layers/vector';
+import { addMonasImage } from './layers/raster';
+import { addAttribution } from './controls/basicControls';
+import { logoMitsubishiControl } from './controls/customLogoControls'
+import { addKotaPopup } from './popups/layerPopups';
 
-const mapElement = document.createElement('div');
-mapElement.id = 'map';
-mapElement.style.height = "100vh";
-mapElement.style.width = "100vw";
-mapElement.style.margin = "0";
-document.body.style.margin = "0";
-document.body.appendChild(mapElement);
 
 const map = new Map({
   container: 'map',
   style: 'https://demotiles.maplibre.org/globe.json',
-  center: [107.66, -7.14],
+  center: [106.83, -6.19],
   zoom: 1,
+  attributionControl: false,
+  cooperativeGestures: true
 });
 
 map.on("load", () => {
   addKotaLayer(map);
   addPulauLayer(map);
-  addRasterLayer(map);
+  addMonasImage(map);
 
-  map.addSource("monas", {
-    type: "image",
-    url: "https://upload.wikimedia.org/wikipedia/id/b/b1/Merdeka_Square_Monas_02.jpg",
-    coordinates: [
-      [106.822, -6.172], // top-left
-      [106.832, -6.172], // top-right
-      [106.832, -6.182], // bottom-right
-      [106.822, -6.182] // bottom-left
-    ]
-  });
-
-  map.addLayer({
-    id: "monas-image",
-    type: "raster",
-    source: "monas",
-  });
 });
+
+map.on("click", "titik-kota", function (event) {
+  addKotaPopup(map, event);
+});
+
+map.on("mouseenter", "titik-kota", () => {
+  map.getCanvas().style.cursor = "pointer";
+});
+
+map.on("mouseleave", "titik-kota", () => {
+  map.getCanvas().style.cursor = "";
+});
+
+map.doubleClickZoom.disable();
+
+
+// Controls setting
+addAttribution(map, "Natural Earth, Monas");
+map.addControl(new FullscreenControl())
+map.addControl(new GlobeControl())
+map.addControl(new LogoControl({ compact: false }))
+map.addControl(new logoMitsubishiControl(), "top-left")

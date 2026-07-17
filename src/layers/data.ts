@@ -1,5 +1,5 @@
 import { Map } from 'maplibre-gl';
-import { addKotaLayer, addPulauLayer } from './vektor';
+import { addKotaLayer, addPulauLayer } from './vector';
 
 const mapElement = document.createElement('div');
 mapElement.id = 'map';

@@ -1,6 +1,6 @@
 import { Map } from 'maplibre-gl';
 
-export function addRasterLayer(map: Map): void {
+export function addMonasImage(map: Map): void {
     // Layer raster
     map.addSource("monas", {
         type: "image",

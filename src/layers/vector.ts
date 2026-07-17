@@ -1,9 +1,9 @@
-import { Map } from 'maplibre-gl';
 import naturalEarthData from "../data/ne.geojson?url";
-import areaData from "../data/area.geojson?url";
+import areaData from "../data/area.geojson?url"
+import { Map } from "maplibre-gl";
 
-export function addKotaLayer(map: Map): void {
-    // Layer vector titik
+export function addKotaLayer(map: Map) {
+    // Layer Vektor - Titik
     map.addSource('kota', {
         type: 'geojson',
         data: naturalEarthData
@@ -14,28 +14,28 @@ export function addKotaLayer(map: Map): void {
         type: "circle",
         source: "kota",
         paint: {
-            "circle-radius": 7,
-            "circle-color": "purple",
+            "circle-radius": 5,
+            "circle-color": "blue",
             "circle-stroke-width": 1,
             "circle-stroke-color": "black"
         }
-    });
+    })
 }
 
-export function addPulauLayer(map: Map): void {
-    // Layer vector polygon
+export function addPulauLayer(map: Map) {
+    // Layer Vektor - Poligon
     map.addSource('pulau', {
         type: "geojson",
-        data: areaData,
-    });
+        data: areaData
+    })
 
     map.addLayer({
         id: "area-pulau",
         type: "fill",
         source: "pulau",
         paint: {
-            "fill-color": "rgba(0, 102, 255, 0.56)",
+            "fill-color": "orange",
             "fill-outline-color": "black"
         }
-    });
+    })
 }
