@@ -1,9 +1,7 @@
 import { geojsonToWKT } from "@terraformer/wkt";
-import type { MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
-
-type FeatureEvent = MapMouseEvent & {
-    features?: MapGeoJSONFeature[];
-};
+import { fetchArea } from "../services/spatialApi";
+import { showToast } from "../utils/toast";
+import type { FeatureEvent, AreaResponse } from "../types/spatial";
 
 export function storeAreaGeometry(event: FeatureEvent, showLoading?: (show: boolean) => void): void {
     if (!event.features || event.features.length === 0) return;
@@ -13,27 +11,28 @@ export function storeAreaGeometry(event: FeatureEvent, showLoading?: (show: bool
     computeArea(wkt, showLoading);
 }
 
-export async function computeArea(wkt: string, showLoading?: (show: boolean) => void): Promise<any> {
+export async function computeArea(wkt: string, showLoading?: (show: boolean) => void): Promise<AreaResponse | undefined> {
     if (showLoading) showLoading(true);
     try {
-        const response = await fetch("http://127.0.0.1:5000/spatial_computation/area", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ geometry: wkt })
-        });
-
-        const result = await response.json();
+        const result = await fetchArea(wkt);
         if (showLoading) showLoading(false);
+
+        if (result.error) {
+            showToast(`Gagal menghitung luas: ${result.error}`, 'error');
+            return result;
+        }
 
         const output = document.getElementById("luas");
         if (output && result.area_ha !== undefined) {
             output.classList.remove("hidden");
-            output.textContent = `Luas Poligon: ${result.area_ha.toLocaleString("ID-id", { maximumFractionDigits: 2 })} ${result.unit}`;
+            const formattedHa = result.area_ha.toLocaleString("ID-id", { maximumFractionDigits: 2 });
+            output.textContent = `Luas Poligon: ${formattedHa} ${result.unit}`;
         }
 
         return result;
-    } catch (err) {
+    } catch (err: any) {
         if (showLoading) showLoading(false);
+        showToast(`Gagal terhubung ke Spatial Engine: ${err.message || err}`, 'error');
         console.error("Area Tool Error:", err);
     }
 }

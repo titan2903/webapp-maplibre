@@ -14,8 +14,10 @@ import { storeAreaGeometry } from './engine/areaTool';
 import { storeBufferGeometry } from './engine/bufferTool';
 import { handleDistanceClick, resetDistanceState } from './engine/distanceTool';
 import { storeCentroidGeometry } from './engine/centroidTool';
+import { checkHealth } from './services/spatialApi';
+import type { AnalysisToolType } from './types/spatial';
 
-let activeTool: 'buffer' | 'area' | 'distance' | 'centroid' = 'buffer';
+let activeTool: AnalysisToolType = 'buffer';
 let bufferDistanceMeters: number = 1000000;
 
 // Initialize Map
@@ -36,7 +38,7 @@ function loadBaseLayers(): void {
 
 map.on("load", () => {
   loadBaseLayers();
-  checkEngineHealth();
+  verifyEngineHealth();
 });
 
 // Controls
@@ -57,20 +59,14 @@ function showLoading(show: boolean): void {
 }
 
 // Check Backend Spatial Engine Connection
-async function checkEngineHealth(): Promise<void> {
+async function verifyEngineHealth(): Promise<void> {
   const badge = document.getElementById("engine-status");
-  try {
-    const res = await fetch("http://127.0.0.1:5000/spatial_computation/area", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ geometry: "POLYGON((110 -7, 111 -7, 111 -8, 110 -8, 110 -7))" })
-    });
-    if (res.ok && badge) {
+  const isHealthy = await checkHealth();
+  if (badge) {
+    if (isHealthy) {
       badge.className = "status-badge online";
       badge.innerHTML = '<span class="status-dot"></span> Online';
-    }
-  } catch (err) {
-    if (badge) {
+    } else {
       badge.className = "status-badge offline";
       badge.innerHTML = '<span class="status-dot" style="background:#ef4444;box-shadow:none"></span> Offline';
     }
@@ -85,7 +81,7 @@ toolButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     toolButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    activeTool = btn.dataset.tool as any;
+    activeTool = btn.dataset.tool as AnalysisToolType;
 
     resetDistanceState();
 

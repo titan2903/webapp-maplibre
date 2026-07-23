@@ -1,11 +1,10 @@
 import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
 import { addBufferLayer } from "../layers/vector";
 import { computeArea } from "./areaTool";
-import type { Map, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
-
-type FeatureEvent = MapMouseEvent & {
-    features?: MapGeoJSONFeature[];
-};
+import { fetchBuffer } from "../services/spatialApi";
+import { showToast } from "../utils/toast";
+import type { Map } from "maplibre-gl";
+import type { FeatureEvent, BufferResponse } from "../types/spatial";
 
 export function storeBufferGeometry(
     map: Map,
@@ -25,19 +24,10 @@ export async function computeBuffer(
     wkt: string,
     distanceMeter: number = 1000000,
     showLoading?: (show: boolean) => void
-): Promise<any> {
+): Promise<BufferResponse | undefined> {
     if (showLoading) showLoading(true);
     try {
-        const response = await fetch("http://127.0.0.1:5000/geometry_manipulation/buffer", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                geometry: wkt,
-                distance_m: distanceMeter
-            })
-        });
-
-        const result = await response.json();
+        const result = await fetchBuffer(wkt, distanceMeter);
         if (result.wkt) {
             const data = wktToGeoJSON(result.wkt);
             addBufferLayer(map, data);
@@ -55,11 +45,15 @@ export async function computeBuffer(
             }
         } else {
             if (showLoading) showLoading(false);
+            if (result.error) {
+                showToast(`Gagal membuat buffer: ${result.error}`, 'error');
+            }
         }
 
         return result;
-    } catch (err) {
+    } catch (err: any) {
         if (showLoading) showLoading(false);
+        showToast(`Gagal terhubung ke Spatial Engine: ${err.message || err}`, 'error');
         console.error("Buffer Tool Error:", err);
     }
 }

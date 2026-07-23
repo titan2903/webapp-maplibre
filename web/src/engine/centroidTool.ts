@@ -1,10 +1,9 @@
 import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
 import { addCentroidLayer } from "../layers/vector";
-import type { Map, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
-
-type FeatureEvent = MapMouseEvent & {
-    features?: MapGeoJSONFeature[];
-};
+import { fetchCentroid } from "../services/spatialApi";
+import { showToast } from "../utils/toast";
+import type { Map } from "maplibre-gl";
+import type { FeatureEvent, CentroidResponse } from "../types/spatial";
 
 export function storeCentroidGeometry(map: Map, event: FeatureEvent, showLoading: (show: boolean) => void): void {
     if (!event.features || event.features.length === 0) return;
@@ -14,16 +13,10 @@ export function storeCentroidGeometry(map: Map, event: FeatureEvent, showLoading
     computeCentroid(map, wkt, showLoading);
 }
 
-export async function computeCentroid(map: Map, wkt: string, showLoading: (show: boolean) => void): Promise<any> {
+export async function computeCentroid(map: Map, wkt: string, showLoading: (show: boolean) => void): Promise<CentroidResponse | undefined> {
     showLoading(true);
     try {
-        const response = await fetch("http://127.0.0.1:5000/geometry_manipulation/centroid", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ geometry: wkt })
-        });
-
-        const result = await response.json();
+        const result = await fetchCentroid(wkt);
         showLoading(false);
 
         if (result.wkt) {
@@ -36,11 +29,14 @@ export async function computeCentroid(map: Map, wkt: string, showLoading: (show:
                 const [lng, lat] = data.coordinates;
                 centroidElement.textContent = `Centroid Titik Pusat: (${lng.toFixed(4)}, ${lat.toFixed(4)})`;
             }
+        } else if (result.error) {
+            showToast(`Gagal mencari centroid: ${result.error}`, "error");
         }
 
         return result;
-    } catch (err) {
+    } catch (err: any) {
         showLoading(false);
+        showToast(`Gagal terhubung ke Spatial Engine: ${err.message || err}`, "error");
         console.error("Centroid Tool Error:", err);
     }
 }
