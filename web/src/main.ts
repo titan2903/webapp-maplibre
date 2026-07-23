@@ -9,7 +9,8 @@ import { addKotaLayer, addPulauLayer } from './layers/vector';
 import { addMonasImage } from './layers/raster';
 import { addAttribution } from './controls/basicControls';
 import { logoMitsubishiControl } from './controls/customLogoControls'
-import { addKotaPopup } from './popups/layerPopups';
+import { storeAreaGeometry } from './engine/areaTool';
+import { storeBufferGeometry } from './engine/bufferTool';
 
 
 const map = new Map({
@@ -29,7 +30,12 @@ map.on("load", () => {
 });
 
 map.on("click", "titik-kota", function (event) {
-  addKotaPopup(map, event);
+  // addKotaPopup(map, event);
+  storeBufferGeometry(map, event);
+});
+
+map.on("click", "area-pulau", function (event) {
+  storeAreaGeometry(event);
 });
 
 map.on("mouseenter", "titik-kota", () => {

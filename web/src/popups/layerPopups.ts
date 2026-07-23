@@ -1,4 +1,5 @@
 import { Popup, type Map, type MapMouseEvent, type MapGeoJSONFeature } from "maplibre-gl";
+import { storeAreaGeometry } from "../engine/areaTool";
 
 const popup = new Popup();
 
@@ -29,3 +30,17 @@ export function addKotaPopup(map: Map, event: FeatureEvent): Popup | undefined {
         `)
         .addTo(map);
 }
+
+export function addPulauPopup(map: Map, event: FeatureEvent): Popup | undefined {
+    storeAreaGeometry(event);
+    
+    return popup
+        .setLngLat(event.lngLat)
+        .setHTML(`
+            <div>
+                <div id="luas"></div>
+            </div>    
+        `)
+        .addTo(map);
+}
+
