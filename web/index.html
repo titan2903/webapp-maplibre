@@ -5,13 +5,117 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webapp Maplibre</title>
+  <title>MapID Spatial Engine WebGIS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <div id="map" style="height: 300px;"></div>
-  <div id="luas"></div>
-  <div id="buffer"></div>
+  <!-- Fullscreen Map Container -->
+  <div id="map"></div>
+
+  <!-- Floating Glassmorphism Dashboard Panel -->
+  <div id="floating-panel" class="glass-card">
+    <div class="panel-header">
+      <div class="brand">
+        <span class="brand-icon">🗺️</span>
+        <h2>Spatial Engine</h2>
+      </div>
+      <span class="status-badge online" id="engine-status">
+        <span class="status-dot"></span> Online
+      </span>
+    </div>
+
+    <!-- Tool Selector -->
+    <div class="panel-section">
+      <label class="section-title">Alat Analisis Spasial</label>
+      <div class="tool-selector">
+        <button class="tool-btn active" data-tool="buffer">
+          <span class="btn-icon">⭕</span> Buffer
+        </button>
+        <button class="tool-btn" data-tool="area">
+          <span class="btn-icon">📐</span> Luas
+        </button>
+        <button class="tool-btn" data-tool="distance">
+          <span class="btn-icon">📏</span> Jarak
+        </button>
+        <button class="tool-btn" data-tool="centroid">
+          <span class="btn-icon">🎯</span> Centroid
+        </button>
+      </div>
+    </div>
+
+    <!-- Parameter Options (Buffer Radius) -->
+    <div class="panel-section" id="buffer-param-section">
+      <div class="param-header">
+        <label for="buffer-slider" class="section-title">Radius Buffer</label>
+        <span class="param-value" id="buffer-val-display">1.000 km</span>
+      </div>
+      <div class="range-container">
+        <input type="range" id="buffer-slider" min="10" max="3000" step="10" value="1000" class="custom-slider">
+      </div>
+    </div>
+
+    <!-- Basemap Switcher -->
+    <div class="panel-section">
+      <label class="section-title">Gaya Peta Dasar</label>
+      <div class="basemap-selector">
+        <button class="basemap-btn active" data-style="globe">🌐 Globe</button>
+        <button class="basemap-btn" data-style="streets">🗺️ Streets</button>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="panel-section">
+      <div class="results-header">
+        <label class="section-title">Hasil Analisis</label>
+        <div id="loading-spinner" class="spinner hidden"></div>
+      </div>
+      <div id="results-panel" class="results-container">
+        <div class="result-placeholder">Klik objek pada peta untuk melakukan analisis</div>
+        <div id="luas" class="result-item hidden"></div>
+        <div id="buffer" class="result-item hidden"></div>
+        <div id="distance" class="result-item hidden"></div>
+        <div id="centroid" class="result-item hidden"></div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="panel-actions">
+      <button id="btn-clear-layers" class="btn-action btn-danger">
+        🗑️ Hapus Analisis Peta
+      </button>
+    </div>
+  </div>
+
+  <!-- Map Legend -->
+  <div id="legend-panel" class="glass-card legend-card">
+    <div class="legend-title">Legenda Peta</div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="legend-symbol symbol-city"></span>
+        <span class="legend-label">Titik Kota</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-symbol symbol-island"></span>
+        <span class="legend-label">Poligon Pulau</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-symbol symbol-buffer"></span>
+        <span class="legend-label">Zona Buffer</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-symbol symbol-distance"></span>
+        <span class="legend-label">Garis Jarak</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-symbol symbol-centroid"></span>
+        <span class="legend-label">Titik Centroid</span>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 
