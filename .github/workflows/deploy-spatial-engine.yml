@@ -1,0 +1,30 @@
+name: Deploy Spatial Engine to Heroku
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'spatial-engine/**'
+      - '.github/workflows/deploy-spatial-engine.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Heroku
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deploy Spatial Engine subfolder to Heroku
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME || 'webapp-maplibre-spatial-engine' }}
+          heroku_email: "titanio.yudista@cakrawala.ac.id"
+          app_path: "spatial-engine"
+          procfile: "web: gunicorn engine:app"
