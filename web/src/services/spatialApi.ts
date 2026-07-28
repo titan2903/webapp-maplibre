@@ -1,6 +1,6 @@
 import type { AreaResponse, BufferResponse, DistanceResponse, CentroidResponse } from "../types/spatial";
 
-const BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_SPATIAL_ENGINE_URL) || 'http://127.0.0.1:5000';
+const BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_SPATIAL_ENGINE_URL) || 'https://webapp-maplibre-spatial-engine-35d9f0049989.herokuapp.com';
 
 async function postJSON<T>(endpoint: string, body: object): Promise<T> {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
